@@ -112,7 +112,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                     <Icon size={18} className={isActive ? "text-[var(--gold-primary)]" : "text-[var(--text-muted)]"} />
                     {item.label[locale]}
                   </div>
-                  {item.badge > 0 && (
+                  {item.badge !== undefined && item.badge > 0 && (
                     <span className="bg-[var(--gold-primary)] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                       {item.badge}
                     </span>
