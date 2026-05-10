@@ -4,11 +4,11 @@ import { useState } from "react";
 import { Plus, Image as ImageIcon, Trash2, Edit2, X, AlertTriangle } from "lucide-react";
 import Image from "next/image";
 import { useAdminStore } from "@/store/adminStore";
-import type { PortfolioItem } from "@/types";
+import type { Project } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function AdminPortfolioPage() {
-  const { portfolioItems, addPortfolioItem, deletePortfolioItem } = useAdminStore();
+  const { portfolioItems, addProject, deleteProject } = useAdminStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -25,19 +25,27 @@ export default function AdminPortfolioPage() {
     
     // In a real app, image upload would happen here, and we'd get a URL back.
     // For this mock, we use a random unsplash image if none provided.
-    const newProject: PortfolioItem = {
+    const newProject: Project = {
       id: `port-${Date.now()}`,
+      slug: `project-${Date.now()}`,
       title: { en: titleEn, ar: titleAr },
       description: { en: descEn, ar: descAr },
-      category: category as any,
-      image: mainImage || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
+      category: category.toLowerCase() as any,
+      heroImage: mainImage || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
       location: { en: "Cairo", ar: "القاهرة" },
       area: "350",
-      style: "Modern",
+      style: "modern",
       gallery: [],
+      year: new Date().getFullYear(),
+      duration: "6 months",
+      challenge: { en: "", ar: "" },
+      solution: { en: "", ar: "" },
+      materials: [],
+      featured: false,
+      tags: [],
     };
 
-    addPortfolioItem(newProject);
+    addProject(newProject);
     setIsFormOpen(false);
     
     // Reset
@@ -46,7 +54,7 @@ export default function AdminPortfolioPage() {
 
   const confirmDelete = () => {
     if (deleteId) {
-      deletePortfolioItem(deleteId);
+      deleteProject(deleteId);
       setDeleteId(null);
     }
   };
@@ -81,7 +89,7 @@ export default function AdminPortfolioPage() {
           portfolioItems.map((item) => (
             <div key={item.id} className="bg-white rounded-2xl overflow-hidden border border-[var(--border-light)] shadow-sm group">
               <div className="relative h-48 bg-[var(--bg-primary)]">
-                <Image src={item.image} alt={item.title.en} fill className="object-cover" />
+                <Image src={item.heroImage} alt={item.title.en} fill className="object-cover" />
                 <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button className="w-8 h-8 rounded-full bg-white text-[var(--text-primary)] flex items-center justify-center shadow-md hover:bg-gray-50">
                     <Edit2 size={14} />

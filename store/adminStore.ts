@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { ClientUser, ClientProject, PortfolioItem, ClientMessage, ClientDocument, ClientPhoto } from "@/types";
+import type { ClientUser, ClientProject, Project, ClientMessage, ClientDocument, ClientPhoto } from "@/types";
 import { mockClientProject, mockUser } from "./portalStore"; // We can reuse some types/mocks
 
 // Types specific to Admin
@@ -46,7 +46,7 @@ interface AdminState {
 
   // Data
   clients: ClientUser[];
-  portfolioItems: PortfolioItem[];
+  portfolioItems: Project[];
   bookingRequests: BookingRequest[];
   blockedSlots: BlockedSlot[];
   businessHours: BusinessHours;
@@ -55,8 +55,8 @@ interface AdminState {
   addClient: (client: ClientUser) => void;
   deleteClient: (id: string) => void;
   
-  addPortfolioItem: (item: PortfolioItem) => void;
-  deletePortfolioItem: (id: string) => void;
+  addProject: (item: Project) => void;
+  deleteProject: (id: string) => void;
   
   updateBookingStatus: (id: string, status: "pending" | "approved" | "rejected") => void;
   addBlockedSlot: (slot: BlockedSlot) => void;
@@ -112,8 +112,8 @@ export const useAdminStore = create<AdminState>()(
       addClient: (client) => set((state) => ({ clients: [...state.clients, client] })),
       deleteClient: (id) => set((state) => ({ clients: state.clients.filter(c => c.id !== id) })),
 
-      addPortfolioItem: (item) => set((state) => ({ portfolioItems: [item, ...state.portfolioItems] })),
-      deletePortfolioItem: (id) => set((state) => ({ portfolioItems: state.portfolioItems.filter(p => p.id !== id) })),
+      addProject: (item) => set((state) => ({ portfolioItems: [item, ...state.portfolioItems] })),
+      deleteProject: (id) => set((state) => ({ portfolioItems: state.portfolioItems.filter(p => p.id !== id) })),
 
       updateBookingStatus: (id, status) => set((state) => ({
         bookingRequests: state.bookingRequests.map(b => b.id === id ? { ...b, status } : b)
