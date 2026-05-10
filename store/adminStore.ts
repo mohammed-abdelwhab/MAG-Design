@@ -92,7 +92,43 @@ export const useAdminStore = create<AdminState>()(
     (set, get) => ({
       adminUser: null,
       isAuthenticated: false,
-      clients: [mockUser], // Import from portal store to start
+      clients: [
+        mockUser,
+        {
+          id: "client-2",
+          clientCode: "LUX2026",
+          password: "password123",
+          name: { en: "Omar Farooq", ar: "عمر فاروق" },
+          email: "omar@example.com",
+          phone: "+20 100 999 8888",
+          avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&q=80",
+          project: {
+            ...mockClientProject,
+            id: "proj-2",
+            title: { en: "Seaside Chalet", ar: "شاليه الساحل" },
+            projectType: "Chalet",
+            style: "Minimalist",
+            overallProgress: 20,
+          }
+        },
+        {
+          id: "client-3",
+          clientCode: "NCA405",
+          password: "password123",
+          name: { en: "Laila Youssef", ar: "ليلى يوسف" },
+          email: "laila@example.com",
+          phone: "+20 100 777 6666",
+          avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80",
+          project: {
+            ...mockClientProject,
+            id: "proj-3",
+            title: { en: "Downtown Office", ar: "مكتب وسط البلد" },
+            projectType: "Commercial",
+            style: "Industrial",
+            overallProgress: 85,
+          }
+        }
+      ],
       portfolioItems: [], // Usually we'd load this from the existing data/portfolio.ts, but we'll mock it here
       bookingRequests: initialBookings,
       blockedSlots: [],

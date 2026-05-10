@@ -8,6 +8,7 @@ import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/shared/Container";
 import { SectionHeader } from "@/components/shared/SectionHeader";
 import { useUIStore } from "@/store/uiStore";
+import { useAdminStore } from "@/store/adminStore";
 import { portfolioProjects } from "@/data/portfolio";
 import { fadeUp, staggerContainer, staggerItem } from "@/lib/animations";
 
@@ -15,6 +16,7 @@ type Category = "all" | "villa" | "apartment" | "penthouse" | "commercial" | "ch
 
 export function PortfolioGridSection() {
   const { locale } = useUIStore();
+  const { portfolioItems } = useAdminStore();
   const [activeCategory, setActiveCategory] = useState<Category>("all");
 
   const categories: { id: Category; label: { en: string; ar: string } }[] = [
@@ -25,7 +27,9 @@ export function PortfolioGridSection() {
     { id: "chalet", label: { en: "Chalets", ar: "شاليهات" } },
   ];
 
-  const filteredProjects = portfolioProjects.filter(
+  const allProjects = [...portfolioItems, ...portfolioProjects];
+
+  const filteredProjects = allProjects.filter(
     (p) => activeCategory === "all" || p.category === activeCategory
   );
 

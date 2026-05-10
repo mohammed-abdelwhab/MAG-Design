@@ -6,6 +6,7 @@ import { ArrowRight, ArrowLeft, CheckCircle2, Calendar as CalendarIcon, Clock } 
 import { Container } from "@/components/shared/Container";
 import { useUIStore } from "@/store/uiStore";
 import { useBookingStore } from "@/store/bookingStore";
+import { useAdminStore } from "@/store/adminStore";
 import { fadeUp } from "@/lib/animations";
 import type { ProjectTypeOption } from "@/types";
 
@@ -41,9 +42,24 @@ export function BookingFormSection() {
     { id: "other", label: { en: "Other", ar: "أخرى" } },
   ];
 
+  const { bookingRequests, blockedSlots } = useAdminStore();
+
   const timeSlots = [
-    "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM"
+    "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"
   ];
+
+  const formattedDate = formData.date ? formData.date.toISOString().split("T")[0] : null;
+
+  const getAvailableTimeSlots = () => {
+    if (!formattedDate) return timeSlots;
+    return timeSlots.filter(time => {
+      const isBlocked = blockedSlots.some(slot => slot.date === formattedDate && slot.time === time);
+      const isBooked = bookingRequests.some(req => req.status === "approved" && req.preferredDate === formattedDate && req.preferredTime === time);
+      return !isBlocked && !isBooked;
+    });
+  };
+
+  const availableTimeSlots = getAvailableTimeSlots();
 
   const renderStepIndicator = () => (
     <div className="flex items-center justify-center mb-12">
@@ -205,7 +221,7 @@ export function BookingFormSection() {
                     {locale === "en" ? "Preferred Time Slot" : "فترة الوقت المفضلة"}
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {timeSlots.map((time) => (
+                    {availableTimeSlots.map((time) => (
                       <button
                         key={time}
                         type="button"
@@ -219,6 +235,11 @@ export function BookingFormSection() {
                         {time}
                       </button>
                     ))}
+                    {availableTimeSlots.length === 0 && (
+                      <div className="col-span-full py-4 text-center text-sm text-red-500 bg-red-50 rounded-lg">
+                        {locale === "en" ? "No available slots on this date." : "لا توجد مواعيد متاحة في هذا اليوم."}
+                      </div>
+                    )}
                   </div>
                 </div>
 

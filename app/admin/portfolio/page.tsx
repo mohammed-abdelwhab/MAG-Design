@@ -20,6 +20,17 @@ export default function AdminPortfolioPage() {
   const [category, setCategory] = useState("Residential");
   const [mainImage, setMainImage] = useState("");
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setMainImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -179,16 +190,22 @@ export default function AdminPortfolioPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Main Image (URL for now or PC Upload)</label>
+                    <label className="block text-sm font-medium mb-1">Main Image (URL or PC Upload)</label>
                     <div className="flex items-center gap-2">
                       <div className="flex-1 relative">
                         <ImageIcon size={18} className="absolute left-3 top-3.5 text-gray-400" />
                         <input type="text" placeholder="https://..." value={mainImage} onChange={e => setMainImage(e.target.value)} className="w-full pl-10 pr-3 py-3 rounded-lg border border-[var(--border-light)] focus:border-[var(--gold-primary)] outline-none" />
                       </div>
-                      <button type="button" className="px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-semibold transition-colors">
+                      <label className="cursor-pointer px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-semibold transition-colors">
                         Browse PC
-                      </button>
+                        <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                      </label>
                     </div>
+                    {mainImage && (
+                      <div className="mt-3 relative h-20 w-32 rounded-lg overflow-hidden border border-[var(--border-light)]">
+                        <Image src={mainImage} alt="Preview" fill className="object-cover" />
+                      </div>
+                    )}
                   </div>
                 </div>
 
