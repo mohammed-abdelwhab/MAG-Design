@@ -9,13 +9,25 @@ import { SectionHeader } from "@/components/shared/SectionHeader";
 import { AnimatedReveal } from "@/components/shared/AnimatedReveal";
 import { LuxuryButton } from "@/components/shared/LuxuryButton";
 import { useUIStore } from "@/store/uiStore";
+import { useAdminStore } from "@/store/adminStore";
 import { portfolioProjects } from "@/data/portfolio";
 import { staggerContainer, staggerItem } from "@/lib/animations";
 
-const FEATURED = portfolioProjects.filter((p) => p.featured).slice(0, 6);
-
 export function PortfolioPreviewSection() {
   const { locale } = useUIStore();
+  const { portfolioItems, deletedStaticProjects, staticProjectOverrides } = useAdminStore();
+
+  const allProjects = [
+    ...portfolioItems,
+    ...portfolioProjects
+      .filter(p => !deletedStaticProjects.includes(p.id))
+      .map(p => ({
+        ...p,
+        ...staticProjectOverrides[p.id]
+      }))
+  ];
+
+  const FEATURED = allProjects.filter((p) => p.featured).slice(0, 6);
 
   return (
     <section id="portfolio" className="section-padding bg-[var(--bg-primary)]">

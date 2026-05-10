@@ -8,12 +8,25 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, X, Maximize2 } from "lucide-react";
 import { Container } from "@/components/shared/Container";
 import { useUIStore } from "@/store/uiStore";
+import { useAdminStore } from "@/store/adminStore";
 import { portfolioProjects } from "@/data/portfolio";
 import { fadeUp, staggerContainer, staggerItem } from "@/lib/animations";
 
 export function ProjectDetailSection({ slug }: { slug: string }) {
   const { locale, dir } = useUIStore();
-  const project = portfolioProjects.find((p) => p.slug === slug);
+  const { portfolioItems, deletedStaticProjects, staticProjectOverrides } = useAdminStore();
+
+  const allProjects = [
+    ...portfolioItems,
+    ...portfolioProjects
+      .filter(p => !deletedStaticProjects.includes(p.id))
+      .map(p => ({
+        ...p,
+        ...staticProjectOverrides[p.id]
+      }))
+  ];
+
+  const project = allProjects.find((p) => p.slug === slug);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -28,7 +41,19 @@ export function ProjectDetailSection({ slug }: { slug: string }) {
     };
   }, [lightboxOpen]);
 
-  if (!project) return notFound();
+  if (!project) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--dark-deep)] text-white">
+        <h1 className="font-display text-8xl font-bold text-[var(--gold-primary)] mb-4">404</h1>
+        <p className="font-body text-xl text-white/60 mb-8">
+          {locale === "en" ? "This project could not be found." : "لم يتم العثور على هذا المشروع."}
+        </p>
+        <Link href="/portfolio" className="px-8 py-3 bg-[var(--gold-primary)] text-white rounded-full font-semibold hover:bg-[var(--gold-light)] transition-colors">
+          {locale === "en" ? "Return to Portfolio" : "العودة إلى المعرض"}
+        </Link>
+      </div>
+    );
+  }
 
   const openLightbox = (index: number) => {
     setCurrentImageIndex(index);

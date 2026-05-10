@@ -47,6 +47,8 @@ interface AdminState {
   // Data
   clients: ClientUser[];
   portfolioItems: Project[];
+  deletedStaticProjects: string[];
+  staticProjectOverrides: Record<string, Partial<Project>>;
   bookingRequests: BookingRequest[];
   blockedSlots: BlockedSlot[];
   businessHours: BusinessHours;
@@ -56,7 +58,8 @@ interface AdminState {
   deleteClient: (id: string) => void;
   
   addProject: (item: Project) => void;
-  deleteProject: (id: string) => void;
+  deleteProject: (id: string, isStatic?: boolean) => void;
+  toggleProjectFeatured: (id: string, isStatic?: boolean, initialFeatured?: boolean) => void;
   
   updateBookingStatus: (id: string, status: "pending" | "approved" | "rejected") => void;
   addBlockedSlot: (slot: BlockedSlot) => void;
@@ -130,13 +133,14 @@ export const useAdminStore = create<AdminState>()(
         }
       ],
       portfolioItems: [], // Usually we'd load this from the existing data/portfolio.ts, but we'll mock it here
+      deletedStaticProjects: [],
+      staticProjectOverrides: {},
       bookingRequests: initialBookings,
       blockedSlots: [],
       businessHours: { open: "09:00", close: "17:00", slotDurationMinutes: 30 },
 
       login: async (email, pass) => {
         await new Promise((resolve) => setTimeout(resolve, 500));
-        // Hardcoded admin for demo
         if (email === "admin@magdesign.com" && pass === "admin123") {
           set({ adminUser: initialAdmin, isAuthenticated: true });
           return true;
@@ -149,7 +153,28 @@ export const useAdminStore = create<AdminState>()(
       deleteClient: (id) => set((state) => ({ clients: state.clients.filter(c => c.id !== id) })),
 
       addProject: (item) => set((state) => ({ portfolioItems: [item, ...state.portfolioItems] })),
-      deleteProject: (id) => set((state) => ({ portfolioItems: state.portfolioItems.filter(p => p.id !== id) })),
+      deleteProject: (id, isStatic) => set((state) => {
+        if (isStatic) {
+          return { deletedStaticProjects: [...state.deletedStaticProjects, id] };
+        }
+        return { portfolioItems: state.portfolioItems.filter(p => p.id !== id) };
+      }),
+      toggleProjectFeatured: (id, isStatic, initialFeatured = false) => set((state) => {
+        if (isStatic) {
+          const overrides = state.staticProjectOverrides[id] || {};
+          const isFeatured = overrides.featured !== undefined ? overrides.featured : initialFeatured;
+          return {
+            staticProjectOverrides: {
+              ...state.staticProjectOverrides,
+              [id]: { ...overrides, featured: !isFeatured }
+            }
+          };
+        } else {
+          return {
+            portfolioItems: state.portfolioItems.map(p => p.id === id ? { ...p, featured: !p.featured } : p)
+          };
+        }
+      }),
 
       updateBookingStatus: (id, status) => set((state) => ({
         bookingRequests: state.bookingRequests.map(b => b.id === id ? { ...b, status } : b)
@@ -163,3 +188,4 @@ export const useAdminStore = create<AdminState>()(
     }
   )
 );
+

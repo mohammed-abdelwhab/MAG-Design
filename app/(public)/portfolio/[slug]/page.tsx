@@ -6,7 +6,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const p = await params;
   const project = portfolioProjects.find((proj) => proj.slug === p.slug);
   
-  if (!project) return { title: "Project Not Found" };
+  if (!project) return { title: "Project | MAG Design Portfolio" };
   
   return {
     title: `${project.title.en} | MAG Design Portfolio`,
