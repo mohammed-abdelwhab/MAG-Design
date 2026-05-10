@@ -9,9 +9,10 @@ import type { Project } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function AdminPortfolioPage() {
-  const { portfolioItems, deletedStaticProjects, staticProjectOverrides, addProject, deleteProject, toggleProjectFeatured } = useAdminStore();
+  const { portfolioItems, deletedStaticProjects, staticProjectOverrides, addProject, updateProject, deleteProject, toggleProjectFeatured } = useAdminStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [deleteData, setDeleteData] = useState<{id: string, isStatic: boolean} | null>(null);
+  const [editData, setEditData] = useState<{id: string, isStatic: boolean} | null>(null);
 
   // Form State
   const [titleEn, setTitleEn] = useState("");
@@ -74,6 +75,38 @@ export default function AdminPortfolioPage() {
     setGalleryImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleEdit = (project: any) => {
+    setEditData({ id: project.id, isStatic: project.isStatic });
+    setTitleEn(project.title.en);
+    setTitleAr(project.title.ar);
+    setDescEn(project.description.en);
+    setDescAr(project.description.ar);
+    
+    // Category check
+    const predefinedCategories = ["villa", "apartment", "penthouse", "chalet", "commercial"];
+    if (predefinedCategories.includes(project.category)) {
+      setCategorySelection(project.category);
+      setCustomCategory("");
+    } else {
+      setCategorySelection("other");
+      setCustomCategory(project.category);
+    }
+    
+    setMainImage(project.heroImage);
+    setGalleryImages(project.gallery?.map((g: any) => g.src) || []);
+    setArea(project.area);
+    setDuration(project.duration);
+    setYear(project.year);
+    setChallengeEn(project.challenge?.en || "");
+    setChallengeAr(project.challenge?.ar || "");
+    setSolutionEn(project.solution?.en || "");
+    setSolutionAr(project.solution?.ar || "");
+    setMaterialsEn(project.materials?.map((m: any) => m.en).join(", ") || "");
+    setMaterialsAr(project.materials?.map((m: any) => m.ar).join(", ") || "");
+    
+    setIsFormOpen(true);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -90,31 +123,51 @@ export default function AdminPortfolioPage() {
       });
     }
 
-    const newProject: Project = {
-      id: `port-${Date.now()}`,
-      slug: `project-${Date.now()}`,
-      title: { en: titleEn, ar: titleAr },
-      description: { en: descEn, ar: descAr },
-      category: finalCategory as any,
-      heroImage: mainImage || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
-      location: { en: "Cairo", ar: "القاهرة" },
-      area: area || "350",
-      style: "modern",
-      year: year,
-      duration: duration || "6 months",
-      challenge: { en: challengeEn, ar: challengeAr },
-      solution: { en: solutionEn, ar: solutionAr },
-      materials: formattedMaterials,
-      featured: false,
-      tags: [],
-      gallery: galleryImages.map((src, i) => ({
-        id: `gal-${Date.now()}-${i}`,
-        src,
-        alt: { en: `${titleEn} Gallery ${i+1}`, ar: `${titleAr} Gallery ${i+1}` }
-      }))
-    };
+    if (editData) {
+      updateProject(editData.id, editData.isStatic, {
+        title: { en: titleEn, ar: titleAr },
+        description: { en: descEn, ar: descAr },
+        category: finalCategory as any,
+        heroImage: mainImage || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
+        area: area || "350",
+        year: year,
+        duration: duration || "6 months",
+        challenge: { en: challengeEn, ar: challengeAr },
+        solution: { en: solutionEn, ar: solutionAr },
+        materials: formattedMaterials,
+        gallery: galleryImages.map((src, i) => ({
+          id: `gal-${Date.now()}-${i}`,
+          src,
+          alt: { en: `${titleEn} Gallery ${i+1}`, ar: `${titleAr} Gallery ${i+1}` }
+        }))
+      });
+    } else {
+      const newProject: Project = {
+        id: `port-${Date.now()}`,
+        slug: `project-${Date.now()}`,
+        title: { en: titleEn, ar: titleAr },
+        description: { en: descEn, ar: descAr },
+        category: finalCategory as any,
+        heroImage: mainImage || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
+        location: { en: "Cairo", ar: "القاهرة" },
+        area: area || "350",
+        style: "modern",
+        year: year,
+        duration: duration || "6 months",
+        challenge: { en: challengeEn, ar: challengeAr },
+        solution: { en: solutionEn, ar: solutionAr },
+        materials: formattedMaterials,
+        featured: false,
+        tags: [],
+        gallery: galleryImages.map((src, i) => ({
+          id: `gal-${Date.now()}-${i}`,
+          src,
+          alt: { en: `${titleEn} Gallery ${i+1}`, ar: `${titleAr} Gallery ${i+1}` }
+        }))
+      };
+      addProject(newProject);
+    }
 
-    addProject(newProject);
     setIsFormOpen(false);
     
     // Reset Form
@@ -122,6 +175,7 @@ export default function AdminPortfolioPage() {
     setArea(""); setDuration(""); setYear(new Date().getFullYear());
     setChallengeEn(""); setChallengeAr(""); setSolutionEn(""); setSolutionAr("");
     setMaterialsEn(""); setMaterialsAr(""); setCategorySelection("villa"); setCustomCategory("");
+    setEditData(null);
   };
 
   const confirmDelete = () => {
@@ -143,7 +197,14 @@ export default function AdminPortfolioPage() {
           </p>
         </div>
         <button
-          onClick={() => setIsFormOpen(true)}
+          onClick={() => {
+            setEditData(null);
+            setTitleEn(""); setTitleAr(""); setDescEn(""); setDescAr(""); setMainImage(""); setGalleryImages([]);
+            setArea(""); setDuration(""); setYear(new Date().getFullYear());
+            setChallengeEn(""); setChallengeAr(""); setSolutionEn(""); setSolutionAr("");
+            setMaterialsEn(""); setMaterialsAr(""); setCategorySelection("villa"); setCustomCategory("");
+            setIsFormOpen(true);
+          }}
           className="btn-primary flex items-center justify-center gap-2 px-6 hover:scale-105 transition-transform"
         >
           <Plus size={18} />
@@ -172,7 +233,9 @@ export default function AdminPortfolioPage() {
                   >
                     <Star size={14} fill={item.featured ? "currentColor" : "none"} />
                   </button>
-                  <button className="w-8 h-8 rounded-full bg-white text-[var(--text-primary)] flex items-center justify-center shadow-md hover:bg-gray-50 hover:scale-110 transition-transform">
+                  <button 
+                    onClick={() => handleEdit(item)}
+                    className="w-8 h-8 rounded-full bg-white text-[var(--text-primary)] flex items-center justify-center shadow-md hover:bg-gray-50 hover:scale-110 transition-transform">
                     <Edit2 size={14} />
                   </button>
                   <button 
@@ -220,8 +283,8 @@ export default function AdminPortfolioPage() {
               className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
             >
               <div className="sticky top-0 bg-white border-b border-[var(--border-light)] p-6 flex items-center justify-between z-10">
-                <h2 className="font-display text-xl font-semibold">Add Portfolio Project</h2>
-                <button onClick={() => setIsFormOpen(false)} className="text-gray-400 hover:text-gray-600 hover:scale-110 transition-transform">
+                <h2 className="font-display text-xl font-semibold">{editData ? "Edit Portfolio Project" : "Add Portfolio Project"}</h2>
+                <button onClick={() => { setIsFormOpen(false); setEditData(null); }} className="text-gray-400 hover:text-gray-600 hover:scale-110 transition-transform">
                   <X size={24} />
                 </button>
               </div>

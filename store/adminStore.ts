@@ -58,6 +58,7 @@ interface AdminState {
   deleteClient: (id: string) => void;
   
   addProject: (item: Project) => void;
+  updateProject: (id: string, isStatic: boolean, data: Partial<Project>) => void;
   deleteProject: (id: string, isStatic?: boolean) => void;
   toggleProjectFeatured: (id: string, isStatic?: boolean, initialFeatured?: boolean) => void;
   
@@ -153,6 +154,19 @@ export const useAdminStore = create<AdminState>()(
       deleteClient: (id) => set((state) => ({ clients: state.clients.filter(c => c.id !== id) })),
 
       addProject: (item) => set((state) => ({ portfolioItems: [item, ...state.portfolioItems] })),
+      updateProject: (id, isStatic, data) => set((state) => {
+        if (isStatic) {
+          return {
+            staticProjectOverrides: {
+              ...state.staticProjectOverrides,
+              [id]: { ...(state.staticProjectOverrides[id] || {}), ...data }
+            }
+          };
+        }
+        return {
+          portfolioItems: state.portfolioItems.map(p => p.id === id ? { ...p, ...data } : p)
+        };
+      }),
       deleteProject: (id, isStatic) => set((state) => {
         if (isStatic) {
           return { deletedStaticProjects: [...state.deletedStaticProjects, id] };

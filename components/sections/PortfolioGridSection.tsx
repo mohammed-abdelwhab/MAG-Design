@@ -16,7 +16,7 @@ type Category = "all" | "villa" | "apartment" | "penthouse" | "commercial" | "ch
 
 export function PortfolioGridSection() {
   const { locale } = useUIStore();
-  const { portfolioItems } = useAdminStore();
+  const { portfolioItems, deletedStaticProjects, staticProjectOverrides } = useAdminStore();
   const [activeCategory, setActiveCategory] = useState<Category>("all");
 
   const categories: { id: Category; label: { en: string; ar: string } }[] = [
@@ -27,7 +27,15 @@ export function PortfolioGridSection() {
     { id: "chalet", label: { en: "Chalets", ar: "شاليهات" } },
   ];
 
-  const allProjects = [...portfolioItems, ...portfolioProjects];
+  const allProjects = [
+    ...portfolioItems,
+    ...portfolioProjects
+      .filter(p => !deletedStaticProjects?.includes(p.id))
+      .map(p => ({
+        ...p,
+        ...(staticProjectOverrides?.[p.id] || {})
+      }))
+  ];
 
   const filteredProjects = allProjects.filter(
     (p) => activeCategory === "all" || p.category === activeCategory
