@@ -27,13 +27,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     setMounted(true);
-    if (!isAuthenticated) {
+    if (!isAuthenticated && pathname !== "/admin/login") {
       router.replace("/admin/login");
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, pathname, router]);
 
-  if (!mounted || !isAuthenticated || !adminUser) {
-    return null; // or loading
+  if (!mounted) {
+    return null; // Avoid hydration mismatch
+  }
+
+  // If we are on the login page, just render the login component without the sidebar
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
+
+  if (!isAuthenticated || !adminUser) {
+    return null; // Prevents flashing the dashboard before redirect
   }
 
   const navItems = [
