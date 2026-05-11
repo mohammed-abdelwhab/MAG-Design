@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -17,15 +18,21 @@ export function PortfolioPreviewSection() {
   const { locale } = useUIStore();
   const { portfolioItems, deletedStaticProjects, staticProjectOverrides } = useAdminStore();
 
-  const allProjects = [
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const allProjects = mounted ? [
     ...portfolioItems,
     ...portfolioProjects
-      .filter(p => !deletedStaticProjects.includes(p.id))
+      .filter(p => !deletedStaticProjects?.includes(p.id))
       .map(p => ({
         ...p,
-        ...staticProjectOverrides[p.id]
+        ...(staticProjectOverrides?.[p.id] || {})
       }))
-  ];
+  ] : portfolioProjects;
 
   const FEATURED = allProjects.filter((p) => p.featured).slice(0, 6);
 

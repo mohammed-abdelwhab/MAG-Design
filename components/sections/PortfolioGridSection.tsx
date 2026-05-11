@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -27,7 +27,13 @@ export function PortfolioGridSection() {
     { id: "chalet", label: { en: "Chalets", ar: "شاليهات" } },
   ];
 
-  const allProjects = [
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const allProjects = mounted ? [
     ...portfolioItems,
     ...portfolioProjects
       .filter(p => !deletedStaticProjects?.includes(p.id))
@@ -35,7 +41,7 @@ export function PortfolioGridSection() {
         ...p,
         ...(staticProjectOverrides?.[p.id] || {})
       }))
-  ];
+  ] : portfolioProjects;
 
   const filteredProjects = allProjects.filter(
     (p) => activeCategory === "all" || p.category === activeCategory

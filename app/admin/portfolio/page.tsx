@@ -38,10 +38,10 @@ export default function AdminPortfolioPage() {
   const allProjects = [
     ...portfolioItems.map(p => ({ ...p, isStatic: false, originalFeatured: false })),
     ...portfolioProjects
-      .filter(p => !deletedStaticProjects.includes(p.id))
+      .filter(p => !deletedStaticProjects?.includes(p.id))
       .map(p => ({
         ...p,
-        ...staticProjectOverrides[p.id],
+        ...(staticProjectOverrides?.[p.id] || {}),
         isStatic: true,
         originalFeatured: p.featured
       }))
